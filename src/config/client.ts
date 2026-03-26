@@ -79,7 +79,7 @@ export const client = {
 
   // Reviews — placeholder
   reviews: [
-    { name: "Daryl Reseigh", rating: 5, text: "I have used Your Garden Built for many projects now and every single one has been outstanding. The team are professional, friendly and accommodating. I have had a bespoke garden enclosure made for our cats, a new gravel driveway, a …  ", date: "4 years ago" },
+    { name: "Daryl Reseigh", rating: 5, text: "I have used Your Garden Built for many projects now and every single one has been outstanding. The team are professional, friendly and accommodating. I have had a bespoke garden enclosure made for our cats, a new gravel driveway, a soakaway, new turf lawn and laurel hedges all planned and installed by Your Garden Built and I couldn’t be happier with all of it! I wouldn’t use anyone else for all my landscaping and garden needs!", date: "4 years ago", badge: "Local Guide" },
   ] as { name: string; rating: number; text: string; date: string; badge?: string }[],
 
   // SEO
