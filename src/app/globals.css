@@ -1,0 +1,398 @@
+@import "tailwindcss";
+
+/* ═══ Z-INDEX SYSTEM (taste skill: systemic layering) ═══ */
+:root {
+  --z-base: 0;
+  --z-canvas: 1;
+  --z-mask: 2;
+  --z-overlay: 10;
+  --z-progress: 15;
+  --z-nav: 20;
+  --z-loading: 30;
+  --z-grain: 40;
+
+  --color-primary: #2d5016;
+  --color-primary-light: #4a7c28;
+  --color-accent: #d4b87a;
+  --color-dark: #1a1a1a;
+  --color-light: #f5f1eb;
+
+  /* taste skill: custom easing — never use default ease */
+  --ease-smooth: cubic-bezier(0.32, 0.72, 0, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  font-family: "Space Grotesk", system-ui, -apple-system, sans-serif;
+  color: var(--color-dark);
+  background: #0a0a0a; /* taste skill: no pure black */
+  overflow-x: hidden;
+}
+
+h1, h2, h3 {
+  font-family: "Playfair Display", Georgia, serif;
+}
+
+/* taste skill: body paragraph constraint */
+p {
+  max-width: 65ch;
+}
+
+/* ═══ ANIMATIONS ═══ */
+
+@keyframes bounceDown {
+  0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+  40% { transform: translateY(8px); }
+  60% { transform: translateY(4px); }
+}
+
+/* taste skill: scroll entry animation */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(2rem);
+    filter: blur(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
+  }
+}
+
+/* Applied via GSAP ScrollTrigger, but CSS fallback for no-JS */
+.scroll-reveal {
+  opacity: 0;
+  transform: translateY(2rem);
+  filter: blur(4px);
+  transition: all 0.8s var(--ease-smooth);
+}
+.scroll-reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+  filter: blur(0);
+}
+
+/* taste skill: staggered grid children — animate when parent scroll-reveal is visible */
+.scroll-reveal.visible .stagger-grid > *:nth-child(1) { transition-delay: 0ms; }
+.scroll-reveal.visible .stagger-grid > *:nth-child(2) { transition-delay: 80ms; }
+.scroll-reveal.visible .stagger-grid > *:nth-child(3) { transition-delay: 160ms; }
+.scroll-reveal.visible .stagger-grid > *:nth-child(4) { transition-delay: 240ms; }
+.scroll-reveal.visible .stagger-grid > *:nth-child(5) { transition-delay: 320ms; }
+.scroll-reveal.visible .stagger-grid > *:nth-child(6) { transition-delay: 400ms; }
+.scroll-reveal.visible .stagger-grid > *:nth-child(7) { transition-delay: 480ms; }
+.scroll-reveal.visible .stagger-grid > *:nth-child(8) { transition-delay: 560ms; }
+.scroll-reveal.visible .stagger-grid > *:nth-child(9) { transition-delay: 640ms; }
+
+.stagger-grid > * {
+  opacity: 0;
+  transform: translateY(1.5rem);
+  transition: all 0.6s var(--ease-smooth);
+}
+
+.scroll-reveal.visible .stagger-grid > * {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ═══ SCROLL PROGRESS (taste skill: use scaleX not width) ═══ */
+
+.scroll-progress {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background: var(--color-accent);
+  z-index: var(--z-progress);
+  transform-origin: left;
+  transform: scaleX(0);
+  opacity: 0;
+  transition: opacity 0.3s var(--ease-smooth);
+}
+.scroll-progress.visible {
+  opacity: 1;
+}
+
+/* ═══ CINEMATIC END FADE ═══ */
+
+.cinematic-end-fade {
+  position: relative;
+  margin-top: -15vh;
+  height: 15vh;
+  background: linear-gradient(to bottom, transparent, var(--color-light));
+  z-index: var(--z-mask);
+  pointer-events: none;
+}
+
+/* Critical: DO NOT add scroll-behavior: smooth — it breaks GSAP ScrollTrigger on iOS Safari */
+
+/* Lock scroll while loading */
+html.is-loading {
+  overflow: hidden;
+}
+
+/* ═══ LOADING SCREEN ═══ */
+
+.loading-screen {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-loading);
+  background: #0a0a0a; /* taste skill: no pure black */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.6s var(--ease-smooth);
+}
+
+.loading-screen.loaded {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.loading-bar-track {
+  width: 200px;
+  height: 2px;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 1px;
+  overflow: hidden;
+  margin-top: 24px;
+}
+
+.loading-bar-fill {
+  height: 100%;
+  width: 100%;
+  background: var(--color-accent);
+  border-radius: 1px;
+  transition: transform 0.15s var(--ease-smooth);
+  transform-origin: left;
+}
+
+/* ═══ CINEMATIC CANVAS ═══ */
+
+.cinematic-canvas {
+  position: sticky;
+  top: 0;
+  width: 100vw;
+  height: 100dvh;
+  z-index: var(--z-base);
+  will-change: transform;
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+}
+
+/* Inward masking gradient */
+.cinematic-mask {
+  background:
+    linear-gradient(to bottom, rgba(10,10,10,0.6) 0%, transparent 15%, transparent 85%, rgba(10,10,10,0.8) 100%),
+    linear-gradient(to right, rgba(10,10,10,0.3) 0%, transparent 10%, transparent 90%, rgba(10,10,10,0.3) 100%);
+}
+
+/* ═══ GLASS CARD (taste skill: inner shadow for refraction) ═══ */
+
+.glass-card {
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 1.25rem;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+/* ═══ DOUBLE-BEZEL CARD (taste skill: outer shell + inner core) ═══ */
+
+.bezel-card {
+  padding: 0.375rem;
+  border-radius: 1.5rem;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.bezel-card-inner {
+  border-radius: calc(1.5rem - 0.375rem);
+  background: rgba(255, 255, 255, 0.06);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  padding: 2rem 1.75rem;
+}
+
+/* ═══ CTA BUTTON (taste skill: custom easing + active state) ═══ */
+
+.cta-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 16px 32px;
+  background: var(--color-accent);
+  color: #0a0a0a; /* taste skill: no pure black */
+  font-weight: 600;
+  font-size: 1rem;
+  border-radius: 8px;
+  text-decoration: none;
+  transition: all 0.3s var(--ease-smooth);
+  pointer-events: auto;
+}
+
+.cta-button:hover {
+  background: #e0c88e;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 30px rgba(212, 184, 122, 0.4);
+  transition: all 0.4s var(--ease-spring);
+}
+
+/* taste skill: active press feedback with spring */
+.cta-button:active {
+  transform: translateY(0) scale(0.98);
+  box-shadow: 0 2px 10px rgba(212, 184, 122, 0.3);
+  transition: all 0.15s var(--ease-smooth);
+}
+
+/* Spring hover for bezel cards */
+.bezel-card {
+  transition: transform 0.4s var(--ease-spring), box-shadow 0.4s var(--ease-spring);
+}
+
+.bezel-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+}
+
+/* ═══ PILL BADGE (taste skill: eyebrow tags) ═══ */
+
+.pill-badge {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  font-family: "Space Grotesk", system-ui, sans-serif;
+}
+
+.pill-badge-accent {
+  background: rgba(212, 184, 122, 0.15);
+  color: var(--color-accent);
+  border: 1px solid rgba(212, 184, 122, 0.2);
+}
+
+.pill-badge-primary {
+  background: rgba(45, 80, 22, 0.1);
+  color: var(--color-primary);
+  border: 1px solid rgba(45, 80, 22, 0.15);
+}
+
+/* ═══ FORM (taste skill: labels above inputs) ═══ */
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.form-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.form-input {
+  padding: 14px 18px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 0.75rem;
+  color: white;
+  font-size: 1rem;
+  outline: none;
+  transition: border-color 0.3s var(--ease-smooth);
+}
+
+.form-input:focus {
+  border-color: var(--color-accent);
+}
+
+.form-input::placeholder {
+  color: rgba(255, 255, 255, 0.3);
+}
+
+.form-error {
+  font-size: 0.7rem;
+  color: #f87171;
+  min-height: 1rem;
+}
+
+/* ═══ SECTIONS ═══ */
+
+.section-dark {
+  background: var(--color-dark);
+  color: white;
+}
+
+.section-light {
+  background: var(--color-light);
+  color: var(--color-dark);
+}
+
+/* ═══ GRAIN TEXTURE ═══ */
+
+.grain-overlay {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: var(--z-grain);
+  opacity: 0.03;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+}
+
+/* ═══ RESPONSIVE GRIDS ═══ */
+
+@media (max-width: 900px) {
+  .transformation-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+  .reviews-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+  .bento-span {
+    grid-column: auto !important;
+  }
+}
+
+@media (max-width: 550px) {
+  .transformation-grid {
+    grid-template-columns: 1fr !important;
+  }
+  .reviews-grid {
+    grid-template-columns: 1fr !important;
+  }
+  .bento-span {
+    grid-column: auto !important;
+  }
+}
+
+/* Responsive masking gradient for mobile */
+@media (max-width: 768px) {
+  .cinematic-mask {
+    background:
+      linear-gradient(to bottom, rgba(10,10,10,0.3) 0%, transparent 10%, transparent 90%, rgba(10,10,10,0.5) 100%);
+  }
+  .pill-badge {
+    font-size: 0.7rem;
+  }
+  .form-label {
+    font-size: 0.8rem;
+  }
+  .form-error {
+    font-size: 0.75rem;
+  }
+  /* scroll indicator now visible on mobile too */
+}
